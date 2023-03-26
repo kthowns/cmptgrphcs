@@ -1,0 +1,76 @@
+1. 시나리오
+  바다에 해가 뜨고 지는 것을 표현한다. 
+  바다의 파도가 치는 것을 표현하기 위해 noise()함수를 통해 Terrain을 구성한다.
+  Random한 Vertex들의 조합과 바다의 색을 조합하여 바다와 비슷한 지형을 만든다.
+  해가 뜨고 지는 것은 시간이 지남에 따라 Background의 명도를 조절하여 표현한다. 
+2. 소스코드
+var cols, rows;            //지형의 가로와 세로 수
+var scl = 20;              //사이즈
+var w = 1400;              //지형의 가로 세로 크기
+var h = 1000;
+
+var r = 0;                  //배경색 변수 초기화
+var g = 0;
+var b = 0;
+var delta = 1;              //delta변수를 이용하여 색 변경
+
+var flying = 0;
+
+var terrain = [];          // 2d 배열생성
+
+function setup() {
+  createCanvas(600, 600, WEBGL); // 3d 캔버스 생성
+  cols = w / scl;
+  rows = h / scl;                      //cols와 rows 변수를 사용하여 terrain 배열에 빈 값을 할당
+
+  for (var x = 0; x < cols; x++) {     
+    terrain[x] = [];
+    for (var y = 0; y < rows; y++) {
+      terrain[x][y] = 0;               //현재 default값 저장
+    }
+  }
+  noStroke();                          //선 없애기
+}
+
+function draw() {
+
+  flying -= 0.1;                        // flying 변수의 값을 감소시키고 yoff에 초기화
+  var yoff = flying;
+  for (var y = 0; y < rows; y++) {
+    var xoff = 0;
+    for (var x = 0; x < cols; x++) {    
+      terrain[x][y] = map(noise(xoff, yoff), 0, 1, -100, 100); // noise() 함수를 사용하여 지형의 불규칙한 높이를 계산
+      xoff += 0.2;
+    }
+    yoff += 0.2;
+  }                                     //x,y좌표의 노이즈값을 계산하여 2d 배열에 저장
+  
+    r += delta*1.7;                      //배경의 색을 변경, 값을 조율하여 원하는 색상표현
+    g += delta*1.9;              
+    b += delta*2;
+  
+  if(r >255 || g > 255 || b > 255){
+    delta = -delta                        //최대로 밝아졌을 때 밝기반전
+  }
+  else if(r < 0 || g < 0 || b < 0){      
+    delta = -delta;                       //최대로 어두워졌을때 밝기반전 
+  }
+  
+  background(r,g,b);                     //배경색 지정
+  
+  translate(0, 200);                      
+  rotateX(PI /3);                        //지형의 기울기
+  fill(50, 80, 220, 180);                 // r,g,b, 불투명도
+  translate(-w / 2, -h / 2);
+  for (var y = 0; y < rows - 1; y++) {
+    beginShape(TRIANGLE_STRIP);
+    for (var x = 0; x < cols; x++) {
+      vertex(x * scl, y * scl, terrain[x][y]);
+      vertex(x * scl, (y + 1) * scl, terrain[x][y + 1]);
+    }
+    endShape();
+  }            /*beginShape()와 endShape() 함수는 삼각형 스트립을 그리는 데 사용됩니다.
+                 이를 통해 각각의 지형 블록을 결합하여 부드러운 지형을 만듭니다.*/
+}
+3. 
+https://youtu.be/kn5XZRQN960
